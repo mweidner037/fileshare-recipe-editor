@@ -1,0 +1,5 @@
+build
+out
+# The current eslint-typescript setup does not like JS files
+# (including .eslintrc.js). For now, just ignore them.
+*.js

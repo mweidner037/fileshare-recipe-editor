@@ -1,0 +1,9 @@
+// See https://webpack.js.org/configuration/configuration-languages/#typescript
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES6"
+  },
+  "include": ["./webpack.config.ts"]
+}

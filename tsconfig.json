@@ -1,0 +1,13 @@
+// Base tsconfig.json. Mostly used to turn on strict mode in VSCode, which
+// doesn't appear to recognize tsconfigs that are not called `tsconfig.json`.
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "importHelpers": true,
+    "jsx": "react"
+  }
+}
