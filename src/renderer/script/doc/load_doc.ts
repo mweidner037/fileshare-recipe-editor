@@ -1,6 +1,6 @@
 import { onFileChange, onSignalClose } from "../ipc/receive_ipc";
 import { callMain } from "../ipc/send_ipc";
-import { RichTextDoc } from "./rich_text_doc";
+import { RecipeDoc } from "./recipe_doc";
 
 const SAVE_INTERVAL = 5000;
 
@@ -12,8 +12,8 @@ const SAVE_INTERVAL = 5000;
  * explicitly sync that state to your GUI (can't rely on events
  * like for future changes).
  */
-export async function loadDoc(): Promise<RichTextDoc> {
-  const doc = RichTextDoc.new();
+export async function loadDoc(): Promise<RecipeDoc> {
+  const doc = new RecipeDoc();
 
   // Load the initial state.
   const initialContents = await callMain("loadInitial");

@@ -1,16 +1,11 @@
 import React from "react";
-import { RichTextDoc } from "../doc/rich_text_doc";
-import { CollabsQuill } from "./collabs_quill";
+import { RecipeDoc } from "../doc/recipe_doc";
+import { Recipe } from "./recipe";
 
-export function Editor({ doc }: { doc: RichTextDoc | null }) {
+export function Editor({ doc }: { doc: RecipeDoc | null }) {
   if (doc === null) {
     return <p>Loading...</p>;
   } else {
-    return (
-      <CollabsQuill
-        text={doc.text}
-        style={{ minHeight: "100%", height: "auto" }}
-      />
-    );
+    return <Recipe recipe={doc.recipe} />;
   }
 }

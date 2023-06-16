@@ -6,10 +6,10 @@ import path from "path";
 import { callRenderer } from "./ipc/send_ipc";
 
 const OPEN_WITH =
-  "fileshare rich-text-demo, https://github.com/mweidner037/fileshare-rich-text-demo";
-const TYPE = "com.mattweidner.fileshare-rich-text-demo.FileContent";
+  "fileshare recipe-editor, https://github.com/mweidner037/fileshare-recipe-editor";
+const TYPE = "com.mattweidner.fileshare-recipe-editor.FileContent";
 
-const root = path.join(os.homedir(), "Dropbox/Files/filestore-rich-text-demo");
+const root = path.join(os.homedir(), "Dropbox/Files/fileshare-recipe-editor");
 // TODO: what if deviceID is not unique among collaborators?
 const deviceID = os.hostname();
 const ourFile = path.join(root, deviceID + ".json");

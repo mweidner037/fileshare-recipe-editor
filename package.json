@@ -1,7 +1,7 @@
 {
-  "name": "fileshare-rich-text-demo",
+  "name": "fileshare-recipe-editor",
   "version": "0.0.0",
-  "description": "Collaborative rich text editor on top of Dropbox or similar",
+  "description": "Local-first collaborative recipe editor on top of Dropbox",
   "author": "Matthew Weidner",
   "license": "Apache-2.0",
   "main": "build/main/main/main.js",

@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import { loadDoc } from "../doc/load_doc";
-import { RichTextDoc } from "../doc/rich_text_doc";
+import { RecipeDoc } from "../doc/recipe_doc";
 import { Editor } from "./editor";
 
 export function App() {
-  const [doc, setDoc] = useState<RichTextDoc | null>(null);
+  const [doc, setDoc] = useState<RecipeDoc | null>(null);
 
   // On first render, start loadDoc.
   const firstRender = useRef<boolean>(true);
