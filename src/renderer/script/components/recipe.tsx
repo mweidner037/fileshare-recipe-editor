@@ -1,17 +1,23 @@
-import { CList, CObject, CVar, InitToken } from "@collabs/collabs";
-import React from "react";
+import { CList, CObject, CRichText, CVar, InitToken } from "@collabs/collabs";
+import React, { useState } from "react";
 
 import { useCollab } from "../collabs-react";
 import { CIngredient, Ingredient } from "./ingredient";
 
 export class CRecipe extends CObject {
+  readonly recipeName: CVar<string>;
   private readonly _ingrs: CList<CIngredient, []>;
   // Controls the ambient scale.
   private readonly _scaleVar: CVar<number>;
+  readonly instructions: CRichText;
 
   constructor(init: InitToken) {
     super(init);
 
+    this.recipeName = super.registerCollab(
+      "name",
+      (nameInit) => new CVar(nameInit, "Untitled")
+    );
     this._scaleVar = super.registerCollab(
       "scaleVar",
       (scaleVarInit) => new CVar(scaleVarInit, 1)
@@ -23,6 +29,10 @@ export class CRecipe extends CObject {
           ingrsInit,
           (valueInit) => new CIngredient(valueInit, this._scaleVar)
         )
+    );
+    this.instructions = super.registerCollab(
+      "instructions",
+      (instInit) => new CRichText(instInit)
     );
 
     // Lazy ingredient events. We don't need scale events because
@@ -60,14 +70,34 @@ export class CRecipe extends CObject {
   }
 }
 
+const maxNameLength = 30;
+
 export function Recipe({ recipe }: { recipe: CRecipe }) {
   useCollab(recipe);
+
+  const [nameEditing, setNameEditing] = useState<string | null>(null);
 
   const ingrs = [...recipe.ingredients()];
   return (
     <>
+      <input
+        type="text"
+        maxLength={maxNameLength}
+        size={maxNameLength}
+        value={nameEditing ?? recipe.recipeName.value}
+        onChange={(e) => setNameEditing(e.target.value)}
+        onBlur={() => {
+          if (nameEditing === null) return;
+          let parsed = nameEditing.slice(0, maxNameLength).trim();
+          if (parsed === "") parsed = "Untitled";
+          recipe.recipeName.value = parsed;
+          setNameEditing(null);
+        }}
+      />
+      <br />
+      <h3>Ingredients</h3>
       <ul>
-        {/* TODO: is position-as-key appropriate given move ops? */}
+        {/* TODO: is position-as-key appropriate given move ops? Will reset React states being edited. */}
         {ingrs.map(([, key, ingr]) => (
           <li key={key}>
             <Ingredient ingr={ingr} />
@@ -76,6 +106,8 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
       </ul>
       <br />
       <button onClick={() => recipe.addIngredient()}>Add Ingredient</button>
+      <br />
+      <CollabsQuill text={recipe.instructions} />
     </>
   );
 }
