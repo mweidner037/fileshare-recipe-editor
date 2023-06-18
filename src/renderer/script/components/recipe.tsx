@@ -1,22 +1,39 @@
-import { CList, CObject, InitToken } from "@collabs/collabs";
+import { CList, CObject, CVar, InitToken } from "@collabs/collabs";
+import React from "react";
 
-import { CIngredient } from "./ingredient";
+import { useCollab } from "../collabs-react";
+import { CIngredient, Ingredient } from "./ingredient";
 
 export class CRecipe extends CObject {
   private readonly _ingrs: CList<CIngredient, []>;
+  // Controls the ambient scale.
+  private readonly _scaleVar: CVar<number>;
 
   constructor(init: InitToken) {
     super(init);
 
+    this._scaleVar = super.registerCollab(
+      "scaleVar",
+      (scaleVarInit) => new CVar(scaleVarInit, 1)
+    );
     this._ingrs = super.registerCollab(
       "ingrs",
       (ingrsInit) =>
-        new CList(ingrsInit, (valueInit) => new CIngredient(valueInit))
+        new CList(
+          ingrsInit,
+          (valueInit) => new CIngredient(valueInit, this._scaleVar)
+        )
     );
+
+    // Lazy ingredient events. We don't need scale events because
+    // those trigger rerenders within each ingredient.
+    this._ingrs.on("Any", (e) => this.emit("Any", e));
   }
 
-  ingredients(): IterableIterator<CIngredient> {
-    return this._ingrs.values();
+  ingredients(): IterableIterator<
+    [index: number, key: string, value: CIngredient]
+  > {
+    return this._ingrs.entries();
   }
 
   addIngredient() {
@@ -32,8 +49,33 @@ export class CRecipe extends CObject {
   }
 
   // TODO: moveIngredient
+
+  scale(factor: number) {
+    if (factor < 0) throw new Error("Invalid factor: less than 0");
+    if (factor === 0) throw new Error("Not yet implemented: scale by 0");
+
+    // Note this is an LWW set - concurrent scales don't stack,
+    // which is probably what the users expect.
+    this._scaleVar.value *= factor;
+  }
 }
 
 export function Recipe({ recipe }: { recipe: CRecipe }) {
-  // TODO
+  useCollab(recipe);
+
+  const ingrs = [...recipe.ingredients()];
+  return (
+    <>
+      <ul>
+        {/* TODO: is position-as-key appropriate given move ops? */}
+        {ingrs.map(([, key, ingr]) => (
+          <li key={key}>
+            <Ingredient ingr={ingr} />
+          </li>
+        ))}
+      </ul>
+      <br />
+      <button onClick={() => recipe.addIngredient()}>Add Ingredient</button>
+    </>
+  );
 }
