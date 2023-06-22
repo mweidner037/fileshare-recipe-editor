@@ -82,6 +82,8 @@ export const CollabsTextInput = forwardRef(function CollabsTextInput(
         }
       }}
       value={text.toString()}
+      // TODO: allow the caller to supply their own replacements/extensions to these,
+      // or remove them from the allowed property list.
       onChange={() => {
         // Add dummy onChange to prevent React readonly complaints (invalid
         // because we edit on keypress using a ref).

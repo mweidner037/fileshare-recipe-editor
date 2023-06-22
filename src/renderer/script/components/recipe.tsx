@@ -172,6 +172,9 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
         Add Ingredient
       </button>
       <br />
+      <button onClick={() => recipe.scale(2)}>Double the recipe</button>
+      <button onClick={() => recipe.scale(0.5)}>Halve the recipe</button>
+      <br />
       <CollabsQuill text={recipe.instructions} />
     </>
   );

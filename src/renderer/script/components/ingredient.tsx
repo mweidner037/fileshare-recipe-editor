@@ -62,7 +62,8 @@ export function Ingredient({
       <input
         type="number"
         min={0}
-        step={0.1}
+        // Although the GUI step is 1, we allow you to type decimals.
+        step={1}
         value={amountEditing ?? ingr.amount.value}
         onChange={(e) => {
           setAmountEditing(e.target.value);
@@ -71,14 +72,7 @@ export function Ingredient({
         onBlur={() => {
           if (amountEditing === null) return;
           const parsed = Number.parseFloat(amountEditing);
-          if (
-            !isNaN(parsed) &&
-            0 <= parsed &&
-            // Soft limit of 4 digits; not enforced with max tag in case
-            // scaling overflows it.
-            parsed <= 9999.9 &&
-            Number.isInteger(10 * parsed)
-          ) {
+          if (!isNaN(parsed) && 0 <= parsed) {
             ingr.amount.value = parsed;
           }
           setAmountEditing(null);
