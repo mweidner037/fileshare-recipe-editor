@@ -1,10 +1,13 @@
 import { app, BrowserWindow, WebContents } from "electron";
-import { stopFileWatch } from "./files";
+import { FileManager } from "./files";
 import { callRenderer } from "./ipc/send_ipc";
 
 const openWindows = new Set<WebContents>();
 
-export function setupCloseBehavior(win: BrowserWindow): void {
+export function setupCloseBehavior(
+  win: BrowserWindow,
+  fileManager: FileManager
+): void {
   // On close, inform the window so it can save, and wait
   // for it to finish saving before quitting.
   let sentCloseSignal = false;
@@ -12,7 +15,7 @@ export function setupCloseBehavior(win: BrowserWindow): void {
   win.on("close", async (e) => {
     if (!sentCloseSignal) {
       sentCloseSignal = true;
-      await stopFileWatch(win.webContents);
+      await fileManager.stopFileWatch();
       callRenderer(win.webContents, "signalClose");
     }
     // TODO: only preventDefault on first try, in case renderer is frozen?

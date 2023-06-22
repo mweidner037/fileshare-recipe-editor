@@ -1,7 +1,11 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import { setupCloseBehavior } from "./close_behavior";
+import { FileManager } from "./files";
 import { handleCallMain } from "./ipc/receive_ipc";
+
+// Source of 1-indexed window IDs, used in naming files.
+let nextWindowID = 1;
 
 // To prevent concurrent local writes to our save files
 // (ourFile and latestFile), we force all running instances of
@@ -17,7 +21,8 @@ else {
         preload: path.join(__dirname, "preload.js"),
       },
     });
-    setupCloseBehavior(win);
+    const manager = new FileManager(win.webContents, nextWindowID++);
+    setupCloseBehavior(win, manager);
     void win.loadFile("build/renderer/index.html");
   };
 

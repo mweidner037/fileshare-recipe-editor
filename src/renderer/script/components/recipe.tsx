@@ -37,8 +37,8 @@ export class CRecipe extends CObject {
       (instInit) => new CRichText(instInit)
     );
 
-    // Lazy ingredient events. We don't need scale events because
-    // those trigger rerenders within each ingredient.
+    // Lazy events for state that the Recipe component displays directly.
+    this.recipeName.on("Any", (e) => this.emit("Any", e));
     this._ingrs.on("Any", (e) => this.emit("Any", e));
   }
 
