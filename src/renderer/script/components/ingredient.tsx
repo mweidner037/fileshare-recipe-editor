@@ -63,8 +63,10 @@ export function Ingredient({
         type="number"
         min={0}
         // Although the GUI step is 1, we allow you to type decimals.
+        // These are rounded to .00 in the display, although you can enter
+        // (or scale) more precise values.
         step={1}
-        value={amountEditing ?? ingr.amount.value}
+        value={amountEditing ?? Math.round(ingr.amount.value * 100) / 100}
         onChange={(e) => {
           setAmountEditing(e.target.value);
           if (onChange) onChange();
