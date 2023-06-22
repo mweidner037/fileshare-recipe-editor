@@ -1,5 +1,5 @@
 import { CObject, CText, CVar, InitToken, IVar } from "@collabs/collabs";
-import React, { useState } from "react";
+import React, { Ref, useState } from "react";
 import { CollabsTextInput, useCollab } from "../collabs-react";
 import { CScaleNum } from "../util/c_scale_num";
 
@@ -27,7 +27,13 @@ export class CIngredient extends CObject {
   }
 }
 
-export function Ingredient({ ingr }: { ingr: CIngredient }) {
+export function Ingredient({
+  ingr,
+  textRef,
+}: {
+  ingr: CIngredient;
+  textRef?: Ref<HTMLInputElement>;
+}) {
   // CIngredient does not emit its own events, only its children do.
   // So we must listen on the children that we render here instead of in
   // their own components.
@@ -38,7 +44,7 @@ export function Ingredient({ ingr }: { ingr: CIngredient }) {
 
   return (
     <>
-      <CollabsTextInput text={ingr.text} />
+      <CollabsTextInput text={ingr.text} ref={textRef} />
       <input
         type="number"
         min={0}
@@ -47,7 +53,7 @@ export function Ingredient({ ingr }: { ingr: CIngredient }) {
         onChange={(e) => setAmountEditing(e.target.value)}
         onBlur={() => {
           if (amountEditing === null) return;
-          const parsed = Number.parseInt(amountEditing);
+          const parsed = Number.parseFloat(amountEditing);
           if (
             !isNaN(parsed) &&
             0 <= parsed &&

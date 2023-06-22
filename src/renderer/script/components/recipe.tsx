@@ -1,7 +1,9 @@
 import { CList, CObject, CRichText, CVar, InitToken } from "@collabs/collabs";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
+import { CollabsQuill } from "../collabs-quill";
 import { useCollab } from "../collabs-react";
+import { reactKey } from "../util/react_key";
 import { CIngredient, Ingredient } from "./ingredient";
 
 export class CRecipe extends CObject {
@@ -40,14 +42,12 @@ export class CRecipe extends CObject {
     this._ingrs.on("Any", (e) => this.emit("Any", e));
   }
 
-  ingredients(): IterableIterator<
-    [index: number, key: string, value: CIngredient]
-  > {
-    return this._ingrs.entries();
+  ingredients(): IterableIterator<CIngredient> {
+    return this._ingrs.values();
   }
 
-  addIngredient() {
-    this._ingrs.push();
+  addIngredient(): CIngredient {
+    return this._ingrs.push();
   }
 
   deleteIngredient(ingr: CIngredient): void {
@@ -77,6 +77,17 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
 
   const [nameEditing, setNameEditing] = useState<string | null>(null);
 
+  // When the local user adds a new ingredient, scroll to it and
+  // select its text.
+  const [newIngr, setNewIngr] = useState<CIngredient | null>(null);
+  const newIngrTextRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (newIngrTextRef.current === null) return;
+    newIngrTextRef.current.select();
+    newIngrTextRef.current.scrollIntoView();
+    // Use newIngr as dependency so this only runs on the first render after adding.
+  }, [newIngr]);
+
   const ingrs = [...recipe.ingredients()];
   return (
     <>
@@ -85,6 +96,7 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
         maxLength={maxNameLength}
         size={maxNameLength}
         value={nameEditing ?? recipe.recipeName.value}
+        onFocus={(e) => e.target.select()}
         onChange={(e) => setNameEditing(e.target.value)}
         onBlur={() => {
           if (nameEditing === null) return;
@@ -97,15 +109,27 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
       <br />
       <h3>Ingredients</h3>
       <ul>
-        {/* TODO: is position-as-key appropriate given move ops? Will reset React states being edited. */}
-        {ingrs.map(([, key, ingr]) => (
-          <li key={key}>
-            <Ingredient ingr={ingr} />
+        {ingrs.map((ingr) => (
+          // Use ingr "itself" as a React key instead of Position, so that
+          // React remembers component state even during move ops.
+          // TODO: scroll-to-ingredient if the one you're editing is moved.
+          <li key={reactKey(ingr)}>
+            <Ingredient
+              ingr={ingr}
+              textRef={ingr === newIngr ? newIngrTextRef : undefined}
+            />
           </li>
         ))}
       </ul>
       <br />
-      <button onClick={() => recipe.addIngredient()}>Add Ingredient</button>
+      <button
+        onClick={() => {
+          const ingr = recipe.addIngredient();
+          setNewIngr(ingr);
+        }}
+      >
+        Add Ingredient
+      </button>
       <br />
       <CollabsQuill text={recipe.instructions} />
     </>

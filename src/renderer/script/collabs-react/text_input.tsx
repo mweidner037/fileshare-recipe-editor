@@ -1,23 +1,28 @@
 import { CText, Cursor, Cursors } from "@collabs/collabs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { useCollab } from "./hooks";
 
-export type CollabsTextInputProps = { text: CText } & Omit<
+export type CollabsTextInputProps = {
+  text: CText;
+} & Omit<
   React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   >,
-  "value" | "type" | "ref" | "defaultValue"
+  "value" | "type" | "defaultValue" | "ref"
 >;
 
 // TODO: ability to control selection, e.g. select all onFocus, or reset selection
 // to begin/end on focus.
 
-export function CollabsTextInput(props: CollabsTextInputProps) {
+export const CollabsTextInput = forwardRef(function CollabsTextInput(
+  props: CollabsTextInputProps,
+  externalRef: React.ForwardedRef<HTMLInputElement>
+) {
   const { text, ...other } = props;
   useCollab(text);
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const internalRef = useRef<HTMLInputElement | null>(null);
   const [startCursor, setStartCursor] = useState<Cursor>(
     Cursors.fromIndex(0, text)
   );
@@ -28,18 +33,20 @@ export function CollabsTextInput(props: CollabsTextInputProps) {
     // Update the selection to match startCursor and endCursor.
     // We do this on every render (no deps) since it is almost as much
     // work to check if it is necessary (= indices changed).
-    if (inputRef.current === null) return;
-    inputRef.current.selectionStart = Cursors.toIndex(startCursor, text);
-    inputRef.current.selectionEnd = Cursors.toIndex(endCursor, text);
+    if (internalRef.current === null) return;
+    internalRef.current.selectionStart = Cursors.toIndex(startCursor, text);
+    internalRef.current.selectionEnd = Cursors.toIndex(endCursor, text);
   });
 
   // Updates startCursor and endCursor to match the current selection.
   function updateCursors() {
-    if (inputRef.current === null) return;
+    if (internalRef.current === null) return;
     setStartCursor(
-      Cursors.fromIndex(inputRef.current.selectionStart ?? 0, text)
+      Cursors.fromIndex(internalRef.current.selectionStart ?? 0, text)
     );
-    setEndCursor(Cursors.fromIndex(inputRef.current.selectionEnd ?? 0, text));
+    setEndCursor(
+      Cursors.fromIndex(internalRef.current.selectionEnd ?? 0, text)
+    );
   }
 
   // Whether we should type e.key.
@@ -63,8 +70,22 @@ export function CollabsTextInput(props: CollabsTextInputProps) {
     <input
       {...other}
       type="text"
-      ref={inputRef}
+      ref={(el) => {
+        // Use both internalRef and externalRef as functions.
+        // TODO: consider only exposing "allowed" methods, e.g., select
+        // and scroll into view (and wrap select so it plays nice with
+        // Cursors). https://react.dev/reference/react/forwardRef#exposing-an-imperative-handle-instead-of-a-dom-node
+        internalRef.current = el;
+        if (externalRef !== null) {
+          if (typeof externalRef === "function") externalRef(el);
+          else externalRef.current = el;
+        }
+      }}
       value={text.toString()}
+      onChange={() => {
+        // Add dummy onChange to prevent React readonly complaints (invalid
+        // because we edit on keypress using a ref).
+      }}
       onSelect={updateCursors}
       onKeyDown={(e) => {
         const startIndex = Cursors.toIndex(startCursor, text);
@@ -122,4 +143,4 @@ export function CollabsTextInput(props: CollabsTextInputProps) {
       onDrop={(e) => e.preventDefault()}
     />
   );
-}
+});
