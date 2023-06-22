@@ -4,6 +4,15 @@ import { RecipeDoc } from "./recipe_doc";
 
 const SAVE_INTERVAL = 5000;
 
+// TODO: nicer way to express this (class?)
+// If not for the connected button, loadDoc() could just
+// return the doc. But we should have a nice pattern regardless
+// to help debug general apps.
+export interface LoadDocReturn {
+  doc: RecipeDoc;
+  onConnectedChange: (newValue: boolean) => void;
+}
+
 /**
  * Sets up the RichTextDoc, including loading its initial state
  * (before returning) and scheduling future loads & saves.
@@ -12,7 +21,7 @@ const SAVE_INTERVAL = 5000;
  * explicitly sync that state to your GUI (can't rely on events
  * like for future changes).
  */
-export async function loadDoc(): Promise<RecipeDoc> {
+export async function loadDoc(): Promise<LoadDocReturn> {
   const doc = new RecipeDoc();
 
   // Load the initial state.
@@ -21,11 +30,15 @@ export async function loadDoc(): Promise<RecipeDoc> {
     doc.load(savedState);
   }
 
+  // Store connected status (copy of React state).
+  let connected = true;
+
   // Save function.
   let savePending = true;
   let localChange = false;
   let saveInProgress = false;
   async function save() {
+    if (!connected) return;
     if (saveInProgress) {
       // Don't start saving when a save is already in progress.
       // Instead, wait SAVE_INTERVAL and try again.
@@ -74,7 +87,21 @@ export async function loadDoc(): Promise<RecipeDoc> {
   onSignalClose(save);
 
   // Load files that change (presumably due to collaborators).
-  onFileChange((savedState) => doc.load(savedState));
+  let pendingLoads: Uint8Array[] = [];
+  onFileChange((savedState) => {
+    if (connected) doc.load(savedState);
+    else pendingLoads.push(savedState);
+  });
 
-  return doc;
+  function onConnectedChange(newValue: boolean) {
+    connected = newValue;
+    if (connected) {
+      // Process pending loads and saves.
+      pendingLoads.forEach((savedState) => doc.load(savedState));
+      pendingLoads = [];
+      void save();
+    }
+  }
+
+  return { doc, onConnectedChange };
 }
