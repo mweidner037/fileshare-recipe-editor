@@ -1,6 +1,6 @@
 import { CObject, CText, CVar, InitToken, IVar } from "@collabs/collabs";
 import React, { useState } from "react";
-import { useCollab } from "../collabs-react";
+import { CollabsTextInput, useCollab } from "../collabs-react";
 import { CScaleNum } from "../util/c_scale_num";
 
 type Unit = "g" | "mg" | "L" | "mL";
@@ -38,7 +38,7 @@ export function Ingredient({ ingr }: { ingr: CIngredient }) {
 
   return (
     <>
-      <CollabTextInput text={ingr.text} />
+      <CollabsTextInput text={ingr.text} />
       <input
         type="number"
         min={0}
