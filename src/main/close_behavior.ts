@@ -1,6 +1,8 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, WebContents } from "electron";
 import { stopFileWatch } from "./files";
 import { callRenderer } from "./ipc/send_ipc";
+
+const openWindows = new Set<WebContents>();
 
 export function setupCloseBehavior(win: BrowserWindow): void {
   // On close, inform the window so it can save, and wait
@@ -10,19 +12,20 @@ export function setupCloseBehavior(win: BrowserWindow): void {
   win.on("close", async (e) => {
     if (!sentCloseSignal) {
       sentCloseSignal = true;
-      e.preventDefault();
-      await stopFileWatch();
-      callRenderer("signalClose");
+      await stopFileWatch(win.webContents);
+      callRenderer(win.webContents, "signalClose");
     }
-    // Note: if the user hits "X" a second time before we finish saving,
-    // the "close" event will go through and quit the app.
-    // This seems okay - will only interrupt saving if that takes a while
-    // or failed, in which case the user probably meant to "force quit" anyway,
-    // hence failing to save is expected.
+    // TODO: only preventDefault on first try, in case renderer is frozen?
+    e.preventDefault();
   });
+
+  // Record that this window needs to close before quitting.
+  openWindows.add(win.webContents);
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
-export async function readyToClose(): Promise<void> {
-  app.quit();
+export async function readyToClose(caller: WebContents): Promise<void> {
+  openWindows.delete(caller);
+  BrowserWindow.fromWebContents(caller)!.destroy();
+  if (openWindows.size === 0) app.quit();
 }

@@ -1,5 +1,6 @@
 import { Bytes } from "@collabs/collabs";
 import * as chokidar from "chokidar";
+import { WebContents } from "electron";
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
@@ -25,9 +26,11 @@ interface FileContent {
   savedState: string;
 }
 
-export async function loadInitial(): Promise<[savedState: Uint8Array][]> {
+export async function loadInitial(
+  caller: WebContents
+): Promise<[savedState: Uint8Array][]> {
   // Watch for future changes.
-  setupFileWatch();
+  setupFileWatch(caller);
 
   // Read all files in the root dir (including .latest.json, in case the previous
   // save wrote there but not to ourFile); the app will merge their contents.
@@ -81,28 +84,32 @@ async function readContent(fullPath: string): Promise<FileContent | null> {
   }
 }
 
-let watcher: chokidar.FSWatcher | null = null;
+const watchers = new WeakMap<WebContents, chokidar.FSWatcher>();
 
 /** Notifies renderer if a file changes (besides one we just wrote). */
-function setupFileWatch() {
-  watcher = chokidar.watch(root, {
+function setupFileWatch(web: WebContents) {
+  const watcher = chokidar.watch(root, {
     ignoreInitial: true,
     // To reduce the change of reading a file while it's being written
     // (which readOne skips harmlessly but wastes time reading), wait
     // for its size to stay steady for 200 ms before emitting a change event.
     awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
   });
+  watchers.set(web, watcher);
+
+  const listener = (fullPath: string) => onFileChange(web, fullPath);
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  watcher.on("add", onFileChange);
+  watcher.on("add", listener);
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  watcher.on("change", onFileChange);
+  watcher.on("change", listener);
 }
 
-export async function stopFileWatch(): Promise<void> {
-  if (watcher !== null) await watcher.close();
+export async function stopFileWatch(web: WebContents): Promise<void> {
+  const watcher = watchers.get(web);
+  if (watcher !== undefined) await watcher.close();
 }
 
-async function onFileChange(fullPath: string): Promise<void> {
+async function onFileChange(web: WebContents, fullPath: string): Promise<void> {
   // Skip the files that (only) we write.
   const normalized = path.normalize(fullPath);
   if (normalized === ourFile || normalized === latestFile) return;
@@ -111,7 +118,7 @@ async function onFileChange(fullPath: string): Promise<void> {
   if (content === null) return;
 
   console.log("onFileChange", normalized);
-  callRenderer("onFileChange", Bytes.parse(content.savedState));
+  callRenderer(web, "onFileChange", Bytes.parse(content.savedState));
 }
 
 let saveInProgress = false;
@@ -127,6 +134,7 @@ let saveInProgress = false;
  * we will have to refactor that if we end up calling this elsewhere.
  */
 export async function save(
+  caller: WebContents,
   savedState: Uint8Array,
   localChange: boolean
 ): Promise<void> {
