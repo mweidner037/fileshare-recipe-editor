@@ -1,5 +1,5 @@
 import { CObject, CText, CVar, InitToken, IVar } from "@collabs/collabs";
-import React, { Ref, useState } from "react";
+import React, { Ref, useEffect, useState } from "react";
 import { CollabsTextInput, useCollab } from "../collabs-react";
 import { CScaleNum } from "../util/c_scale_num";
 
@@ -30,9 +30,15 @@ export class CIngredient extends CObject {
 export function Ingredient({
   ingr,
   textRef,
+  onChange,
 }: {
   ingr: CIngredient;
   textRef?: Ref<HTMLInputElement>;
+  /**
+   * Called each time the local user changes the ingredient
+   * (including for "prep" edits that don't yet change the Collabs state).
+   */
+  onChange?: () => void;
 }) {
   // CIngredient does not emit its own events, only its children do.
   // So we must listen on the children that we render here instead of in
@@ -42,6 +48,14 @@ export function Ingredient({
 
   const [amountEditing, setAmountEditing] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (onChange) {
+      return ingr.text.on("Any", (e) => {
+        if (e.meta.isLocalOp) onChange();
+      });
+    }
+  }, [ingr.text, onChange]);
+
   return (
     <>
       <CollabsTextInput text={ingr.text} ref={textRef} />
@@ -50,7 +64,10 @@ export function Ingredient({
         min={0}
         step={0.1}
         value={amountEditing ?? ingr.amount.value}
-        onChange={(e) => setAmountEditing(e.target.value)}
+        onChange={(e) => {
+          setAmountEditing(e.target.value);
+          if (onChange) onChange();
+        }}
         onBlur={() => {
           if (amountEditing === null) return;
           const parsed = Number.parseFloat(amountEditing);
@@ -71,7 +88,10 @@ export function Ingredient({
       />
       <select
         value={ingr.units.value}
-        onChange={(e) => (ingr.units.value = e.target.value as Unit)}
+        onChange={(e) => {
+          ingr.units.value = e.target.value as Unit;
+          if (onChange) onChange();
+        }}
       >
         {AllUnits.map((unit) => (
           <option value={unit} key={unit}>

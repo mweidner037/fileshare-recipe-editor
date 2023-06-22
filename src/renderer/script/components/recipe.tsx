@@ -54,8 +54,16 @@ export class CRecipe extends CObject {
     // Note: CList.indexOf is as fast as get(index), not a linear time search.
     const index = this._ingrs.indexOf(ingr);
     if (index === -1) return;
-    // TODO: archive w/ keepalive instead? Needs enable-wins restoring in CList.
-    this._ingrs.delete(index);
+    // Use archive so keepIngredient can resurrect in case of concurrent edits.
+    this._ingrs.archive(index);
+  }
+
+  /**
+   * Keeps ingr "alive" (present) in the list. Called each time the
+   * ingredient is edited.
+   */
+  keepIngredient(ingr: CIngredient): void {
+    this._ingrs.restore(ingr);
   }
 
   // TODO: moveIngredient
@@ -117,7 +125,11 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
             <Ingredient
               ingr={ingr}
               textRef={ingr === newIngr ? newIngrTextRef : undefined}
+              // TODO: delay keepIngredient slightly, in case of technically
+              // sequential but psychologically concurrent delete+edit?
+              onChange={() => recipe.keepIngredient(ingr)}
             />
+            <button onClick={() => recipe.deleteIngredient(ingr)}>X</button>
           </li>
         ))}
       </ul>
