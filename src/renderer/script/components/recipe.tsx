@@ -66,6 +66,13 @@ export class CRecipe extends CObject {
     this._ingrs.restore(ingr);
   }
 
+  moveIngredient(ingr: CIngredient, index: number): void {
+    // Note: CList.indexOf is as fast as get(index), not a linear time search.
+    const startIndex = this._ingrs.indexOf(ingr);
+    if (startIndex === -1) return;
+    this._ingrs.move(startIndex, index);
+  }
+
   // TODO: moveIngredient
 
   scale(factor: number) {
@@ -113,23 +120,45 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
           recipe.recipeName.value = parsed;
           setNameEditing(null);
         }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
       />
       <br />
       <h3>Ingredients</h3>
       <ul>
-        {ingrs.map((ingr) => (
+        {ingrs.map((ingr, index) => (
           // Use ingr "itself" as a React key instead of Position, so that
           // React remembers component state even during move ops.
           // TODO: scroll-to-ingredient if the one you're editing is moved.
           <li key={reactKey(ingr)}>
-            <Ingredient
-              ingr={ingr}
-              textRef={ingr === newIngr ? newIngrTextRef : undefined}
-              // TODO: delay keepIngredient slightly, in case of technically
-              // sequential but psychologically concurrent delete+edit?
-              onChange={() => recipe.keepIngredient(ingr)}
-            />
-            <button onClick={() => recipe.deleteIngredient(ingr)}>X</button>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <button
+                  style={{ alignSelf: "flex-start" }}
+                  disabled={index === 0}
+                  onClick={() => recipe.moveIngredient(ingr, index - 1)}
+                >
+                  ↑
+                </button>
+                <button
+                  style={{ alignSelf: "flex-start" }}
+                  disabled={index === ingrs.length - 1}
+                  // +2 because we have to hop over ourselves as well.
+                  onClick={() => recipe.moveIngredient(ingr, index + 2)}
+                >
+                  ↓
+                </button>
+              </div>
+              <Ingredient
+                ingr={ingr}
+                textRef={ingr === newIngr ? newIngrTextRef : undefined}
+                // TODO: delay keepIngredient slightly, in case of technically
+                // sequential but psychologically concurrent delete+edit?
+                onChange={() => recipe.keepIngredient(ingr)}
+              />
+              <button onClick={() => recipe.deleteIngredient(ingr)}>X</button>
+            </div>
           </li>
         ))}
       </ul>

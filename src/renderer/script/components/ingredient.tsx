@@ -3,8 +3,8 @@ import React, { Ref, useEffect, useState } from "react";
 import { CollabsTextInput, useCollab } from "../collabs-react";
 import { CScaleNum } from "../util/c_scale_num";
 
-type Unit = "g" | "mg" | "L" | "mL";
-const AllUnits: Unit[] = ["g", "mg", "L", "mL"];
+type Unit = "g" | "mg" | "L" | "mL" | "ct";
+const AllUnits: Unit[] = ["g", "mg", "L", "mL", "ct"];
 const defaultUnit: Unit = "g";
 
 export class CIngredient extends CObject {
