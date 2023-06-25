@@ -15,17 +15,27 @@ export function Editor({
     return <p>Loading...</p>;
   } else {
     return (
-      <>
-        <input
-          id="connected"
-          type="checkbox"
-          checked={connected}
-          onChange={(e) => onConnectedChange(e.target.checked)}
-        />
-        <label htmlFor="connected">Connected</label>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+        }}
+      >
+        <div>
+          <input
+            id="connected"
+            type="checkbox"
+            checked={connected}
+            onChange={(e) => onConnectedChange(e.target.checked)}
+          />
+          <label htmlFor="connected">Connected</label>
+        </div>
         <hr />
-        <Recipe recipe={doc.recipe} />
-      </>
+        <div style={{ flex: "1 0 auto" }}>
+          <Recipe recipe={doc.recipe} />
+        </div>
+      </div>
     );
   }
 }

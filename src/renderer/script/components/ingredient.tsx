@@ -81,6 +81,9 @@ export function Ingredient({
           // TODO: use original scale if the scale changed while you were typing?
           // Kick you out if the scale changes?
         }}
+        style={{ width: "6ch" }}
+        // Hide "invalid" tooltip.
+        title=""
       />
       <select
         value={ingr.units.value}

@@ -1,0 +1,62 @@
+.recipe-name {
+  border: none;
+  font-size: 32pt;
+  font-weight: bold;
+  font-family: inherit;
+}
+
+/* Hidden div used to size the input based on its content. */
+.hidden {
+  visibility: hidden;
+  line-height: 0;
+}
+
+.title {
+  font-size: 20pt;
+  font-weight: bold;
+  text-align: center;
+}
+
+/*
+  For splitting Ingredients & Instructions into two columns.
+  From https://www.w3schools.com/howto/howto_css_split_screen.asp.
+*/
+/* Split the screen in half */
+.split {
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+  box-sizing: border-box;
+}
+
+/* Control the left side */
+.left {
+  left: 0;
+}
+
+/* Control the right side */
+.right {
+  right: 0;
+}
+
+/* If you want the content centered horizontally */
+.centered {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+
+.instructions {
+  width: 100%;
+  padding: 0 30px 10px 30px;
+  box-sizing: border-box;
+}
+
+/* Mess with Quill's sizing. */
+.ql-container {
+  min-height: 300px
+}
