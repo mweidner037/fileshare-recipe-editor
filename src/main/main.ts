@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "path";
 import { setupCloseBehavior } from "./close_behavior";
 import { FileManager } from "./files";
@@ -20,6 +20,15 @@ else {
       webPreferences: {
         preload: path.join(__dirname, "preload.js"),
       },
+    });
+    // Open clicked links from Quill in the system browser instead of a new
+    // Electron window.
+    // From https://www.electronjs.org/docs/latest/tutorial/security#14-disable-or-limit-creation-of-new-windows
+    win.webContents.setWindowOpenHandler(({ url }) => {
+      setImmediate(() => {
+        void shell.openExternal(url);
+      });
+      return { action: "deny" };
     });
     const manager = new FileManager(win.webContents, nextWindowID++);
     setupCloseBehavior(win, manager);

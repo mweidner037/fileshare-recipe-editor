@@ -41,13 +41,17 @@
 }
 
 .left * {
-  font-size: 12pt;
+  font-size: 14pt;
 }
 
 /* Control the right side */
 .right {
   right: 0;
   background-color: rgb(238, 246, 253);
+}
+
+.right * {
+  font-size: 12pt;
 }
 
 /* If you want the content centered horizontally */
@@ -70,6 +74,7 @@
 }
 
 /* Mess with Quill's sizing. */
-.ql-container {
+.ql-container,
+.ql-editor {
   min-height: 300px;
 }

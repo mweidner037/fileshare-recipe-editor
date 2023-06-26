@@ -5,8 +5,8 @@ import { CScaleNum } from "../util/c_scale_num";
 
 import "./ingredient.css";
 
-type Unit = "g" | "mg" | "L" | "mL" | "ct";
-const AllUnits: Unit[] = ["g", "mg", "L", "mL", "ct"];
+type Unit = "kg" | "g" | "mg" | "L" | "mL" | "ct";
+const AllUnits: Unit[] = ["kg", "g", "mg", "L", "mL", "ct"];
 const defaultUnit: Unit = "g";
 
 export class CIngredient extends CObject {
@@ -60,7 +60,7 @@ export function Ingredient({
 
   return (
     <div className="ingredient">
-      <CollabsTextInput text={ingr.text} ref={textRef} size={17} />
+      <CollabsTextInput text={ingr.text} ref={textRef} size={14} />
       <input
         type="number"
         min={0}
@@ -81,7 +81,7 @@ export function Ingredient({
           }
           setAmountEditing(null);
         }}
-        style={{ width: "6ch" }}
+        style={{ width: "5ch" }}
         // Hide "invalid" tooltip.
         title=""
       />

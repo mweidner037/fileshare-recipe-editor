@@ -24,7 +24,8 @@ export function RecipeName({ recipeName }: { recipeName: CVar<string> }) {
           if (nameEditing === null) return;
           let parsed = nameEditing.slice(0, maxNameLength).trim();
           if (parsed === "") parsed = "Untitled";
-          recipeName.value = parsed;
+          // Don't change the state for an aborted edit.
+          if (parsed !== recipeName.value) recipeName.value = parsed;
           setNameEditing(null);
         }}
         onKeyDown={(e) => {

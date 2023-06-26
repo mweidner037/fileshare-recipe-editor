@@ -20,6 +20,7 @@ export function Editor({
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          fontSize: "16pt",
         }}
       >
         <div>
