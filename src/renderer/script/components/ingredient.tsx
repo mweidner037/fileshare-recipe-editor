@@ -60,7 +60,7 @@ export function Ingredient({
 
   return (
     <div className="ingredient">
-      <CollabsTextInput text={ingr.text} ref={textRef} size={14} />
+      <CollabsTextInput text={ingr.text} ref={textRef} size={12} />
       <input
         type="number"
         min={0}

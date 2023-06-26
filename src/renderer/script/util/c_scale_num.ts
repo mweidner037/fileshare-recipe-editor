@@ -32,7 +32,7 @@ export class CScaleNum
 {
   private valueWhenSet = 0;
   private scaleWhenSet = 1;
-  private lamport = -1;
+  private lamport = 0;
   private lamportSender = "";
 
   constructor(init: InitToken, readonly scaleVar: IVar<number>) {

@@ -2,7 +2,8 @@ import { onFileChange, onSignalClose } from "../ipc/receive_ipc";
 import { callMain } from "../ipc/send_ipc";
 import { RecipeDoc } from "./recipe_doc";
 
-const SAVE_INTERVAL = 5000;
+// TODO: debounce (don't save if the user's still working).
+const SAVE_INTERVAL = 1000;
 
 // TODO: nicer way to express this (class?)
 // If not for the connected button, loadDoc() could just
