@@ -4,5 +4,5 @@
     "module": "ES2022",
     "outDir": "build/renderer"
   },
-  "include": ["src/renderer/script", "src/common"]
+  "include": ["src/renderer/script", "src/common", "generated"]
 }

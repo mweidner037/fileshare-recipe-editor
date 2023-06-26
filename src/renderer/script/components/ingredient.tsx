@@ -80,8 +80,6 @@ export function Ingredient({
             ingr.amount.value = parsed;
           }
           setAmountEditing(null);
-          // TODO: use original scale if the scale changed while you were typing?
-          // Kick you out if the scale changes?
         }}
         style={{ width: "6ch" }}
         // Hide "invalid" tooltip.

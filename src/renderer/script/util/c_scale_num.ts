@@ -4,11 +4,28 @@ import {
   IVar,
   InitToken,
   PrimitiveCRDT,
-  StringSerializer,
   UpdateMeta,
   VarEventsRecord,
 } from "@collabs/collabs";
+import { int64AsNumber } from "@collabs/core";
+import {
+  ScaleNumMessage,
+  ScaleNumSave,
+} from "../../../../generated/proto_compiled";
 
+/**
+ * A number with a "scale" controlled by an ambient scaleVar (constructor arg).
+ * Changing the scaleVar causes this.value to be scaled likewise, with conflict
+ * resolutions:
+ * - Set/set: One of the set values is picked arbitrarily (LWW).
+ * - Scale/scale: One of the scales is picked arbitrarily (LWW).
+ * - Scale/set: The set value is kept and also scaled.
+ *
+ * This class is implemented as a custom PrimitiveCRDT for demonstration purposes.
+ * Specifically, the messages implement a Lamport LWW register storing
+ * (valueWhenSet, scaleWhenSet). This isn't actually necessary; a simpler
+ * implementation would just use a CVar<[valueWhenSet: number, scaleWhenSet: number]>.
+ */
 export class CScaleNum
   extends PrimitiveCRDT<VarEventsRecord<number>>
   implements IVar<number>
@@ -37,9 +54,12 @@ export class CScaleNum
   }
 
   set value(_value: number) {
-    // TODO: efficient binary encoding, for demonstation purposes.
-    const message = { valueWhenSet: _value, scaleWhenSet: this.scaleVar.value };
-    super.sendPrimitive(JSON.stringify(message));
+    // Use an optimized custom binary format, as a demonstration.
+    const message = ScaleNumMessage.encode({
+      valueWhenSet: _value,
+      scaleWhenSet: this.scaleVar.value,
+    }).finish();
+    super.sendPrimitive(message);
   }
 
   get value(): number {
@@ -51,10 +71,7 @@ export class CScaleNum
     meta: UpdateMeta,
     crdtMeta: CRDTMessageMeta
   ): void {
-    const decoded = JSON.parse(<string>message) as {
-      valueWhenSet: number;
-      scaleWhenSet: number;
-    };
+    const decoded = ScaleNumMessage.decode(<Uint8Array>message);
     this.processUpdate(
       decoded.valueWhenSet,
       decoded.scaleWhenSet,
@@ -85,14 +102,13 @@ export class CScaleNum
   }
 
   protected saveCRDT(): Uint8Array {
-    // TODO: efficient binary encoding, for demonstation purposes.
-    const message = {
+    // Use an optimized custom binary format, as a demonstration.
+    return ScaleNumSave.encode({
       valueWhenSet: this.valueWhenSet,
       scaleWhenSet: this.scaleWhenSet,
       lamport: this.lamport,
       lamportSender: this.lamportSender,
-    };
-    return StringSerializer.instance.serialize(JSON.stringify(message));
+    }).finish();
   }
 
   protected loadCRDT(
@@ -102,18 +118,11 @@ export class CScaleNum
   ): void {
     if (savedState === null) return;
 
-    const decoded = JSON.parse(
-      StringSerializer.instance.deserialize(savedState)
-    ) as {
-      valueWhenSet: number;
-      scaleWhenSet: number;
-      lamport: number;
-      lamportSender: string;
-    };
+    const decoded = ScaleNumSave.decode(savedState);
     this.processUpdate(
       decoded.valueWhenSet,
       decoded.scaleWhenSet,
-      decoded.lamport,
+      int64AsNumber(decoded.lamport),
       decoded.lamportSender,
       meta
     );
