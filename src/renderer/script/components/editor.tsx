@@ -31,7 +31,7 @@ export function Editor({
           />
           <label htmlFor="connected">Connected</label>
         </div>
-        <hr />
+        <hr style={{ width: "100%" }} />
         <div style={{ flex: "1 0 auto" }}>
           <Recipe recipe={doc.recipe} />
         </div>

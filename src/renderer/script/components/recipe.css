@@ -1,3 +1,19 @@
+.outerDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.outerDiv * {
+  font-family: Lato, Arial, sans-serif;
+}
+
+.recipe-name-wrapper {
+  flex: 0 0 content;
+  display: inline-block;
+}
+
 .recipe-name {
   border: none;
   font-size: 32pt;
@@ -5,16 +21,14 @@
   font-family: inherit;
 }
 
+.outerDiv,.recipe-name-wrapper,.recipe-name {
+  background-color: rgb(248, 252, 252);
+}
+
 /* Hidden div used to size the input based on its content. */
 .hidden {
   visibility: hidden;
   line-height: 0;
-}
-
-.title {
-  font-size: 20pt;
-  font-weight: bold;
-  text-align: center;
 }
 
 /*
@@ -36,11 +50,17 @@
 /* Control the left side */
 .left {
   left: 0;
+  background-color: rgb(225, 238, 233);
+}
+
+.left * {
+  font-size: 12pt;
 }
 
 /* Control the right side */
 .right {
   right: 0;
+  background-color:rgb(238, 246, 253)
 }
 
 /* If you want the content centered horizontally */
@@ -48,6 +68,37 @@
   position: absolute;
   left: 50%;
   transform: translate(-50%, 0%);
+}
+
+.title {
+  font-size: 20pt;
+  font-weight: bold;
+  text-align: center;
+}
+
+.ingredientWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 5px;
+}
+
+.deleteButton {
+  color: white;
+  background-color: rgb(179, 0, 0);
+  border-radius: 3px;
+}
+
+.addButton {
+  color: white;
+  background-color: green;
+  border-radius: 5px;
+  width: 120px;
+  height: 30px;
+  /* Right align */
+  margin-left: auto;
+  margin-right: 0;
+  display: block;
 }
 
 .instructions {
@@ -59,4 +110,12 @@
 /* Mess with Quill's sizing. */
 .ql-container {
   min-height: 300px
+}
+
+.scaleButton {
+  background-color: rgb(158, 201, 190);
+  border-width: 0px;
+  border-radius: 5px;
+  font-size: 14pt;
+  padding: 4px 4px 4px 4px;
 }

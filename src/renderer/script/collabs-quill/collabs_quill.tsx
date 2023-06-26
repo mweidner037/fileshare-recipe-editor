@@ -37,29 +37,13 @@ export function CollabsQuill({
 
     const quill = new Quill(quillRef.current, {
       theme: "snow",
-      // Modules list from quilljs example, based on
-      // https://github.com/KillerCodeMonkey/ngx-quill/issues/295#issuecomment-443268064
       modules: {
         toolbar: [
-          [{ font: [] }, { size: [] }],
-          ["bold", "italic", "underline", "strike"],
-          [{ color: [] }, { background: [] }],
-          [{ script: "super" }, { script: "sub" }],
-          [{ header: "1" }, { header: "2" }, "blockquote", "code-block"],
-          [
-            { list: "ordered" },
-            { list: "bullet" },
-            { indent: "-1" },
-            { indent: "+1" },
-          ],
-          // Omit embeds (images & videos); they require extra effort since
-          // CRichText doesn't allow "object" elements.
-          // Omit "syntax: true" because I can't figure out how
-          // to trick Webpack into importing highlight.js for
-          // side-effects. Same with "formula" and katex.
-          // Omit "direction" because I am not sure whether it is paragraph-level
-          // or not (need to know for noGrowAtEnd).
+          ["bold", "italic"],
+          [{ header: 2 }],
+          [{ list: "ordered" }, { list: "bullet" }],
           ["link"],
+          // TODO: images. Needs CRDT support.
           ["clean"],
         ],
       },

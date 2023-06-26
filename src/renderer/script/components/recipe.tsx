@@ -106,105 +106,99 @@ export function Recipe({ recipe }: { recipe: CRecipe }) {
 
   const ingrs = [...recipe.ingredients()];
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          height: "100%",
-        }}
-      >
-        <div style={{ flex: "0 0 content", display: "inline-block" }}>
-          <input
-            type="text"
-            maxLength={maxNameLength}
-            className="recipe-name"
-            style={{ width: "100%" }}
-            value={nameValue}
-            size={1}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => setNameEditing(e.target.value)}
-            onBlur={() => {
-              if (nameEditing === null) return;
-              let parsed = nameEditing.slice(0, maxNameLength).trim();
-              if (parsed === "") parsed = "Untitled";
-              recipe.recipeName.value = parsed;
-              setNameEditing(null);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.currentTarget.blur();
-            }}
-          />
-          {/* Invisible div to force the parent's (hence input's) size to match valueName. */}
-          <div className="recipe-name hidden">{nameValue}</div>
-        </div>
-        {/* Viewport for absolutely-positioned elements inside (class "split"). */}
-        <div style={{ position: "relative", flex: "1 0 auto", width: "100%" }}>
-          <div className="split left">
-            <div className="centered">
-              <div className="title">Ingredients</div>
-              {ingrs.map((ingr, index) => (
-                // Use ingr "itself" as a React key instead of Position, so that
-                // React remembers component state even during move ops.
-                // TODO: scroll-to-ingredient if the one you're editing is moved.
-                <div
-                  key={reactKey(ingr)}
-                  style={{ display: "flex", alignItems: "center" }}
-                >
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <button
-                      style={{ alignSelf: "flex-start" }}
-                      disabled={index === 0}
-                      onClick={() => recipe.moveIngredient(ingr, index - 1)}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      style={{ alignSelf: "flex-start" }}
-                      disabled={index === ingrs.length - 1}
-                      // +2 because we have to hop over ourselves as well.
-                      onClick={() => recipe.moveIngredient(ingr, index + 2)}
-                    >
-                      ↓
-                    </button>
-                  </div>
-                  <Ingredient
-                    ingr={ingr}
-                    textRef={ingr === newIngr ? newIngrTextRef : undefined}
-                    // TODO: delay keepIngredient slightly, in case of technically
-                    // sequential but psychologically concurrent delete+edit?
-                    onChange={() => recipe.keepIngredient(ingr)}
-                  />
-                  <button onClick={() => recipe.deleteIngredient(ingr)}>
-                    X
+    <div className="outerDiv">
+      <div className="recipe-name-wrapper">
+        <input
+          type="text"
+          maxLength={maxNameLength}
+          className="recipe-name"
+          style={{ width: "100%" }}
+          value={nameValue}
+          size={1}
+          onFocus={(e) => e.target.select()}
+          onChange={(e) => setNameEditing(e.target.value)}
+          onBlur={() => {
+            if (nameEditing === null) return;
+            let parsed = nameEditing.slice(0, maxNameLength).trim();
+            if (parsed === "") parsed = "Untitled";
+            recipe.recipeName.value = parsed;
+            setNameEditing(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+          }}
+        />
+        {/* Invisible div to force the parent's (hence input's) size to match valueName. */}
+        <div className="recipe-name hidden">{nameValue}</div>
+      </div>
+      {/* Viewport for absolutely-positioned elements inside (class "split"). */}
+      <div style={{ position: "relative", flex: "1 0 auto", width: "100%" }}>
+        <div className="split left">
+          <div className="centered">
+            <div className="title">Ingredients</div>
+            {ingrs.map((ingr, index) => (
+              // Use ingr "itself" as a React key instead of Position, so that
+              // React remembers component state even during move ops.
+              // TODO: scroll-to-ingredient if the one you're editing is moved.
+              <div key={reactKey(ingr)} className="ingredientWrapper">
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <button
+                    style={{ alignSelf: "flex-start" }}
+                    disabled={index === 0}
+                    onClick={() => recipe.moveIngredient(ingr, index - 1)}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    style={{ alignSelf: "flex-start" }}
+                    disabled={index === ingrs.length - 1}
+                    // +2 because we have to hop over ourselves as well.
+                    onClick={() => recipe.moveIngredient(ingr, index + 2)}
+                  >
+                    ↓
                   </button>
                 </div>
-              ))}
-              <br />
-              <button
-                onClick={() => {
-                  const ingr = recipe.addIngredient();
-                  setNewIngr(ingr);
-                }}
-              >
-                Add Ingredient
-              </button>
-              <br />
-              <button onClick={() => recipe.scale(2)}>Double the recipe</button>
-              <button onClick={() => recipe.scale(0.5)}>
-                Halve the recipe
-              </button>
-            </div>
+                <Ingredient
+                  ingr={ingr}
+                  textRef={ingr === newIngr ? newIngrTextRef : undefined}
+                  // TODO: delay keepIngredient slightly, in case of technically
+                  // sequential but psychologically concurrent delete+edit?
+                  onChange={() => recipe.keepIngredient(ingr)}
+                />
+                <button
+                  onClick={() => recipe.deleteIngredient(ingr)}
+                  className="deleteButton"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => {
+                const ingr = recipe.addIngredient();
+                setNewIngr(ingr);
+              }}
+              className="addButton"
+            >
+              +
+            </button>
+            <br />
+            <button onClick={() => recipe.scale(2)} className="scaleButton">
+              Double the recipe!
+            </button>
+            &nbsp;&nbsp;
+            <button onClick={() => recipe.scale(0.5)} className="scaleButton">
+              Halve the recipe!
+            </button>
           </div>
-          <div className="split right">
-            <div className="instructions">
-              <div className="title">Instructions</div>
-              <CollabsQuill text={recipe.instructions} />
-            </div>
+        </div>
+        <div className="split right">
+          <div className="instructions">
+            <div className="title">Instructions</div>
+            <CollabsQuill text={recipe.instructions} />
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

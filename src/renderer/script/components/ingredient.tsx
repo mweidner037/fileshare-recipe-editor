@@ -3,6 +3,8 @@ import React, { Ref, useEffect, useState } from "react";
 import { CollabsTextInput, useCollab } from "../collabs-react";
 import { CScaleNum } from "../util/c_scale_num";
 
+import "./ingredient.css";
+
 type Unit = "g" | "mg" | "L" | "mL" | "ct";
 const AllUnits: Unit[] = ["g", "mg", "L", "mL", "ct"];
 const defaultUnit: Unit = "g";
@@ -57,8 +59,8 @@ export function Ingredient({
   }, [ingr.text, onChange]);
 
   return (
-    <>
-      <CollabsTextInput text={ingr.text} ref={textRef} />
+    <div className="ingredient">
+      <CollabsTextInput text={ingr.text} ref={textRef} size={17} />
       <input
         type="number"
         min={0}
@@ -98,6 +100,6 @@ export function Ingredient({
           </option>
         ))}
       </select>
-    </>
+    </div>
   );
 }

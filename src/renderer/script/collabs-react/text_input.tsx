@@ -6,7 +6,7 @@ export type CollabsTextInputProps = {
   text: CText;
 } & Omit<
   React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLInputElement>,
+    React.InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   >,
   "value" | "type" | "defaultValue" | "ref"
